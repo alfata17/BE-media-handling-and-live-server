@@ -6,6 +6,9 @@ const usersV1 = require('./api/v1/users');
 const accountsV1 = require('./api/v1/accounts');
 const profilesV1 = require('./api/v1/profiles');
 const transactionV1 = require('./api/v1/transactions');
+const auth = require('./api/v1/auth');
+const media = require('./api/v1/media');
+
 
 
 module.exports = {
@@ -15,5 +18,7 @@ module.exports = {
     usersV1,
     accountsV1,
     profilesV1,
-    transactionV1
+    transactionV1,
+    auth,
+    media
 }

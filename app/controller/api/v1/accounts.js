@@ -5,22 +5,26 @@ const prisma = new PrismaClient();
 module.exports = {
     async get(req, res){
         try {
-            const bankAccount = await prisma.bankAccount.findMany();
-
-            if (!bankAccount.length) {
+          const { search, page = 1, limit = 10 } = req.query;
+          console.log(req.query);
+          let result = await prisma.bankAccount.findMany({
+              skip: (page - 1) * limit,
+              take: limit,
+          })
+          if(!result.length) {
               return res.status(200).json({ 
-                status: 'success', 
-                code: 200, 
-                message: 'Data Empty'
-              });
-            }
-        
-            return res.status(200).json({ 
+                  status: 'success', 
+                  code: 200, 
+                  message: 'Data Empty'
+              })
+          }
+          
+          return res.status(200).json({ 
               status: 'success', 
               code: 200, 
               message: 'Success!',
-              data: bankAccount
-            });
+              data: result
+          })
           } catch (error) {
             console.error(error);
             return res.status(500).json({

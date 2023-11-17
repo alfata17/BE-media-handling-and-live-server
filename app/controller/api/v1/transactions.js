@@ -5,22 +5,26 @@ const prisma = new PrismaClient();
 module.exports = {
     async get(req, res){
         try {
-            const transactions = await prisma.transaction.findMany();
-        
-            if (!transactions.length) {
+          const { search, page = 1, limit = 10 } = req.query;
+          console.log(req.query);
+          let result = await prisma.transaction.findMany({
+              skip: (page - 1) * limit,
+              take: limit,
+          })
+          if(!result.length) {
               return res.status(200).json({ 
-                status: 'success', 
-                code: 200, 
-                message: 'Data Empty'
-              });
-            }
-        
-            return res.status(200).json({ 
+                  status: 'success', 
+                  code: 200, 
+                  message: 'Data Empty'
+              })
+          }
+          
+          return res.status(200).json({ 
               status: 'success', 
               code: 200, 
               message: 'Success!',
-              data: transactions
-            });
+              data: result
+          })
           } catch (error) {
             console.error(error);
             return res.status(500).json({
@@ -61,9 +65,7 @@ module.exports = {
               status: 'success',
               code: 200,
               message: 'Success!',
-              data: {
-                transaction,
-              },
+              data: {transaction}
             });
           } catch (error) {
             console.error(error);
@@ -118,7 +120,7 @@ module.exports = {
               status: 'success',
               code: 200,
               message: 'Data ditambahkan!',
-              data: transaction,
+              data: transaction
             });
           } catch (error) {
             console.error(error);
@@ -128,23 +130,6 @@ module.exports = {
               message: error.message,
             });
           }
-    },
-    async update(req, res){
-        const transaction = await prisma.transaction.update({
-            where: {
-              id: parseInt(req.params.id), // Sesuaikan dengan nama kolom ID yang digunakan di model Prisma
-            },
-            data: {
-              ...req.body
-            },
-          });
-
-        res.status(201).json({ 
-            status: 'success', 
-            code: 200, 
-            message: 'Data diupdate!',
-            data: transaction
-        })
     },
     async destroy(req, res){
         if(!req.params.id) res.status(400).json({ 

@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require('express');
 const app = express();
 const port = 3000
@@ -10,6 +11,8 @@ const routers = require('./router')
 const swaggerJSON = require('./openapi.json')
 const swaggerUI = require('swagger-ui-express')
 
+const passport = require('./utils/passport');
+
 //perlu ditambahkan sesuatu untuk bisa 
 //menambahkan data
 app.use(express.json())
@@ -21,6 +24,8 @@ app.use(session({
   saveUninitialized: true,
 }))
 app.use(flash())
+app.use(passport.initialize());
+app.use(passport.session())
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, './app/view'))

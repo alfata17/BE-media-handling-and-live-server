@@ -5,9 +5,14 @@ const prisma = new PrismaClient();
 module.exports = {
     async get(req, res){
         try {
-            const user = await prisma.user.findMany();
+          const { search, page = 1, limit = 10 } = req.query;
+          console.log(req.query);
+          let result = await prisma.user.findMany({
+            skip: (page - 1) * limit,
+            take: limit,
+          })
 
-            if (!user.length) {
+            if (!result.length) {
               return res.status(200).json({ 
                 status: 'success', 
                 code: 200, 
@@ -19,7 +24,7 @@ module.exports = {
               status: 'success', 
               code: 200, 
               message: 'Success!',
-              data: user
+              data: result
             });
           } catch (error) {
             console.error(error);

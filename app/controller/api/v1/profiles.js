@@ -4,21 +4,26 @@ const prisma = new PrismaClient();
 
 module.exports = {
     async get(req, res){
-        const profile = await prisma.profile.findMany()
-        if(!profile.length) {
-            return res.status(200).json({ 
-                status: 'success', 
-                code: 200, 
-                message: 'Data Empty'
-            })
-        }
-        
-        return res.status(200).json({ 
-            status: 'success', 
-            code: 200, 
-            message: 'Success!',
-            data: profile
-        })
+        const { search, page = 1, limit = 10 } = req.query;
+          console.log(req.query);
+          let result = await prisma.profile.findMany({
+              skip: (page - 1) * limit,
+              take: limit,
+          })
+          if(!result.length) {
+              return res.status(200).json({ 
+                  status: 'success', 
+                  code: 200, 
+                  message: 'Data Empty'
+              })
+          }
+          
+          return res.status(200).json({ 
+              status: 'success', 
+              code: 200, 
+              message: 'Success!',
+              data: result
+          })
     },
 
     async getById(req, res){

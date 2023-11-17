@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client')
 const { encryptPassword, checkPassword} = require('../../../../utils/auth')
+const { JWTsign} = require('../../../../utils/jwt')
 
 const prisma = new PrismaClient();
 
@@ -29,10 +30,22 @@ module.exports = {
             })
         }
 
+        delete user.password
+        const token = await JWTsign(user)
+
         return res.status(201).json({
             status: "Success",
             message: "Berhasil login!",
-            data: user
+            data: { user,  token}
+        })
+    },
+    async whoami(req,res){
+        return res.status(200).json({
+            status: "Success!",
+            message: "OK",
+            data: {
+                user: req.user
+            }
         })
     },
     async register(req, res){
@@ -74,7 +87,7 @@ module.exports = {
 
         if(user){
             req.flash("error", "email sudah terdaftar")
-            return res.redirect('/register')
+            return res.redirect('/api/register')
         }
 
         const createUser = await prisma.user.create({
@@ -86,6 +99,24 @@ module.exports = {
         });
 
         req.flash("success", "Berhasil Register!")
-        return res.redirect('/login')
+        return res.redirect('/api/login')
+    },
+    authUser: async (email, password, done) => {
+        try{
+            const user = await prisma.user.findUnique({
+                where: {email}
+            })
+
+            if(!user || !await checkPassword(password, user.password)){
+                return done(null, false, {message:'invalid email or password'})
+            }
+
+            return done(null, user)
+        } catch (err) {
+            return done(null, false, {message: err.message})
+        }
+    },
+    dashboard: async (req, res) => {
+        res.render('dashboard', { user: req.user});
     }
 }
