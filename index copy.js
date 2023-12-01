@@ -59,11 +59,9 @@ app.use(Sentry.Handlers.requestHandler());
 // TracingHandler creates a trace for every incoming request
 app.use(Sentry.Handlers.tracingHandler());
 
-app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerJSON))
-app.use('/api',routers);
-
-app.get("/debug-sentry", function mainHandler(req, res) {
-  throw new Error("My first Sentry error!");
+// All your controllers should live here
+app.get("/", function rootHandler(req, res) {
+  res.end("Hello world!");
 });
 
 // The error handler must be registered before any other error middleware and after all controllers
@@ -76,6 +74,9 @@ app.use(function onError(err, req, res, next) {
   res.statusCode = 500;
   res.end(res.sentry + "\n");
 });
+
+app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerJSON))
+app.use('/api',routers);
 
 app.listen(port, () => 
     console

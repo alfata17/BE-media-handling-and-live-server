@@ -1,6 +1,8 @@
 const { PrismaClient } = require('@prisma/client')
+const ejs = require('ejs')
 const { encryptPassword, checkPassword} = require('../../../../utils/auth')
 const { JWTsign} = require('../../../../utils/jwt')
+const { sendMail, sendMailHTML } = require('../../../../utils/mailer')
 
 const prisma = new PrismaClient();
 
@@ -70,11 +72,28 @@ module.exports = {
                 password: await encryptPassword(password)
             }
         });
+        // sendMail(email, `Halo ${name}`, 
+        // `Terima kasih sudah mendaftar di aplikasi kami! Silahkan klik
+        // link berikut untuk proses verifikasi email anda`
+        // )
+        const url = req.protocol+"://"+req.headers.host
+        ejs.renderFile(__dirname + "/emailRegister.ejs", 
+        { 
+            name: name,
+            url: "http://localhost:3000/api/login"
+        }, 
+        function (err, data) {
+            if (err) {
+                console.log(err);
+            } else {
+                sendMailHTML(email, `Halo ${name}`, data)
+                }
+        })
 
         return res.status(201).json({
             status: "Success",
             code: 200,
-            message: "Berhasil register!",
+            message: "Berhasil Register! silahkan cek email untuk verifikasi",
             data: createUser
         })
     },
